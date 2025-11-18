@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %></title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+        }
+
+        /* NAVBAR */
+        nav {
+            background: #003366;
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        nav .logo {
+            color: #fff;
+            font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 20px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            transition: 0.2s ease;
+        }
+
+        nav ul li a:hover {
+            opacity: 0.7;
+        }
+
+        /* HERO SECTION */
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 85%;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 10px;
+        }
+
+        .hero h1 {
+            color: #003366;
+            font-size: 34px;
+        }
+
+        .hero p {
+            font-size: 16px;
+            color: #555;
+            margin-top: 15px;
+        }
+
+        .btn {
+            margin-top: 25px;
+            background: #003366;
+            padding: 12px 24px;
+            color: #fff;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 15px;
+        }
+
+        .btn:hover {
+            background: #00264d;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav>
+        <div class="logo">Condo Management System</div>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/announcements">Announcements</a></li>
+            <li><a href="/facilities">Facilities</a></li>
+            <li><a href="/login">Login</a></li>
+        </ul>
+    </nav>
+
+    <!-- HERO / HOMEPAGE CONTENT -->
+    <div class="hero">
+        <h1>Welcome to the Condo Management System</h1>
+        <p>
+            Your central hub for managing condo facilities, announcements, 
+            service requests, and resident information.
+        </p>
+        <a href="/login" class="btn">Get Started</a>
+    </div>
+
+</body>
+</html>
