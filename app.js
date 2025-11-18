@@ -1,14 +1,18 @@
+// app.js
 const express = require("express");
 const path = require("path");
 
 const app = express();
 const PORT = 3000;
 
-// EJS setup
+// Load MySQL connection
+require("./db");
+
+// View engine setup
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// Body parsers
+// Middlewares
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -16,7 +20,7 @@ app.use(express.json());
 const mainController = require("./controllers/controller");
 app.use("/", mainController);
 
-// Run app
+// Start server
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server running at http://localhost:${PORT}`);
 });
