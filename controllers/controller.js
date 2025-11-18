@@ -1,13 +1,15 @@
 // controllers/controller.js
 const express = require("express");
 const router = express.Router();
-const db = require("../db");
+const db = require("../db"); // database connection
 
+// ======================================================
 // HOME PAGE
+// ======================================================
 router.get("/", (req, res) => {
     db.query("SELECT * FROM roles LIMIT 1", (err, results) => {
         if (err) {
-            console.error(err);
+            console.error("Home page DB error:", err);
             return res.send("Database error");
         }
 
@@ -18,7 +20,9 @@ router.get("/", (req, res) => {
     });
 });
 
+// ======================================================
 // LOGIN PAGE (GET)
+// ======================================================
 router.get("/login", (req, res) => {
     res.render("login", {
         title: "Login - Condo Management System",
@@ -26,18 +30,18 @@ router.get("/login", (req, res) => {
     });
 });
 
+// ======================================================
 // LOGIN FORM SUBMIT (POST)
+// ======================================================
 router.post("/login", (req, res) => {
     const { username, password } = req.body;
 
-    // change table/fields to match your schema
-    const sql = "SELECT * FROM users WHERE username = ?";
-    db.query(sql, [username], (err, results) => {
+    db.query("SELECT * FROM users WHERE username = ?", [username], (err, results) => {
         if (err) {
-            console.error(err);
+            console.error("Login error:", err);
             return res.render("login", {
                 title: "Login - Condo Management System",
-                error: "Database error. Please try again."
+                error: "Database error. Try again."
             });
         }
 
@@ -50,7 +54,6 @@ router.post("/login", (req, res) => {
 
         const user = results[0];
 
-        // simple password check (plain text) – replace with bcrypt if needed
         if (user.password !== password) {
             return res.render("login", {
                 title: "Login - Condo Management System",
@@ -58,19 +61,53 @@ router.post("/login", (req, res) => {
             });
         }
 
-        // if you are using sessions:
-        // req.session.user = { id: user.id, username: user.username };
-
-        // redirect to some protected page
+        // Login success
         res.redirect("/dashboard");
     });
 });
 
-// SIMPLE DASHBOARD (example)
+// DASHBOARD PLACEHOLDER
 router.get("/dashboard", (req, res) => {
-    // if using sessions, you can check if user is logged in here
-    res.send("You are logged in. (Dashboard page placeholder)");
+    res.send("You are logged in!");
 });
 
-module.exports = router;
+// ======================================================
+// ANNOUNCEMENTS PAGE
+// ======================================================
+router.get("/announcements", (req, res) => {
+    const sql = "SELECT * FROM announcements ORDER BY created_at DESC";
 
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Announcements DB error:", err);
+            return res.send("Database error");
+        }
+
+        res.render("announcements", {
+            title: "Announcements",
+            announcements: results
+        });
+    });
+});
+
+// ======================================================
+// FACILITIES PAGE
+// ======================================================
+router.get("/facilities", (req, res) => {
+    const sql = "SELECT * FROM facilities";
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Facilities DB error:", err);
+            return res.send("Database error");
+        }
+
+        res.render("facilities", {
+            title: "Facilities",
+            facilities: results
+        });
+    });
+});
+
+// EXPORT ROUTES
+module.exports = router;

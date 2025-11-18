@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Announcements</title>
+
+    <style>
+        body { font-family: Arial; background: #f4f4f4; margin: 0; }
+        nav { background: #003366; padding: 15px 25px; color: white; display: flex; justify-content: space-between; }
+        nav .logo { color: #fff; font-size: 22px; font-weight: bold; }
+        nav ul { display: flex; gap: 20px; list-style: none; }
+        nav ul li a { color: #fff; text-decoration: none; }
+
+        .container {
+            width: 85%;
+            margin: 40px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        h1 { color: #003366; }
+        .announcement {
+            background: #e6eef7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="logo">Condo Management System</div>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/announcements">Announcements</a></li>
+            <li><a href="/facilities">Facilities</a></li>
+            <li><a href="/login">Login</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h1>Announcements</h1>
+
+        <% announcements.forEach(a => { %>
+            <div class="announcement">
+                <h3><%= a.title %></h3>
+                <p><%= a.details %></p>
+                <small>Posted on: <%= a.created_at.toLocaleDateString() %></small>
+            </div>
+        <% }) %>
+    </div>
+
+</body>
+</html>
