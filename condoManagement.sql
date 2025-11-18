@@ -147,3 +147,24 @@ CREATE TABLE payments (
     status VARCHAR(30),
     FOREIGN KEY (invoice_id) REFERENCES invoices(invoice_id)
 );
+
+-- ===============================
+--  announcements
+-- ===============================
+CREATE TABLE announcements (
+    announcement_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ===============================
+--  facilities
+-- ===============================
+CREATE TABLE facilities (
+    facility_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    open_time TIME,
+    close_time TIME
+);
