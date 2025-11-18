@@ -1,26 +1,34 @@
 // app.js
 const express = require("express");
 const path = require("path");
+const session = require("express-session");
+const routes = require("./controllers/controller");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-// Load MySQL connection
-require("./db");
-
-// View engine setup
+// view engine
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// Middlewares
-app.use(express.urlencoded({ extended: true }));
+// middlewares
+app.use(express.urlencoded({ extended: true })); // for form data
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "public"))); // if you have css/js
 
-// Routes
-const mainController = require("./controllers/controller");
-app.use("/", mainController);
+// session (optional but useful for login)
+app.use(
+    session({
+        secret: "supersecretkey",
+        resave: false,
+        saveUninitialized: false,
+    })
+);
 
-// Start server
+// use routes
+app.use("/", routes);
+
+// start server
 app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
