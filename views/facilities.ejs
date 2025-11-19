@@ -6,33 +6,196 @@
     <title>Facilities</title>
 
     <style>
-        body { font-family: Arial; background: #f4f4f4; margin: 0; }
-        nav { background: #003366; padding: 15px 25px; color: white; display: flex; justify-content: space-between; }
-        nav .logo { color: #fff; font-size: 22px; font-weight: bold; }
-        nav ul { display: flex; gap: 20px; list-style: none; }
-        nav ul li a { color: #fff; text-decoration: none; }
-
-        .container {
-            width: 85%;
-            margin: 40px auto;
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
+        * {
+            box-sizing: border-box;
         }
 
-        h1 { color: #003366; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+        }
 
-        .facility {
-            background: #e6eef7;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
+        /* ========== NAVBAR ========== */
+        nav {
+            background: #003366;
+            padding: 15px 25px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            color: #fff;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+
+        /* ========== HERO SECTION ========== */
+        .hero {
+            position: relative;
+            height: 260px;
+            background-image: url("https://images.adsttc.com/media/images/5b67/0be1/f197/cc32/a300/002a/large_jpg/hanhai_qingyu_2.jpg?1533479842");
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #fff;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+        }
+
+        .hero-content {
+            position: relative;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+
+        .hero-content h1 {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .hero-content p {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        /* ========== MAIN LAYOUT ========== */
+        .page {
+            max-width: 1150px;
+            margin: 30px auto 60px;
+            padding: 0 20px 40px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #003366;
+            margin-bottom: 15px;
+        }
+
+        /* ========== ALL AVAILABLE FACILITIES (TOP LIST) ========== */
+        .info-box {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .info-item {
+            background: #e9f2ff;
+            padding: 12px 18px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ========== AVAILABLE FACILITIES CARDS ========== */
+        .facility-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+        }
+
+        .facility-card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            flex: 1 1 300px;
+            max-width: 340px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .facility-card img {
+            width: 100%;
+            height: 190px;
+            object-fit: cover;
+        }
+
+        .facility-body {
+            padding: 16px 18px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .facility-title {
+            font-size: 17px;
+            font-weight: bold;
+            color: #003366;
+        }
+
+        .facility-desc {
+            font-size: 14px;
+            color: #444;
+            line-height: 1.4;
+        }
+
+        .btn-primary {
+            margin-top: 6px;
+            align-self: flex-start;
+            border: none;
+            background: #003366;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-primary:hover {
+            background: #00509e;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                height: 220px;
+            }
+
+            .hero-content h1 {
+                font-size: 28px;
+            }
         }
     </style>
 </head>
-
 <body>
 
+    <!-- NAVBAR -->
     <nav>
         <div class="logo">Condo Management System</div>
         <ul>
@@ -43,16 +206,90 @@
         </ul>
     </nav>
 
-    <div class="container">
-        <h1>Facilities</h1>
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Our Condo Facilities</h1>
+            <p>
+                Enjoy a range of shared facilities designed for relaxation, fitness and community bonding.
+                Check availability and book your preferred facility through the management office or resident portal.
+            </p>
+        </div>
+    </section>
 
-        <% facilities.forEach(f => { %>
-            <div class="facility">
-                <h3><%= f.facility_name %></h3>
-                <p><%= f.description %></p>
+    <!-- MAIN CONTENT -->
+    <main class="page">
+
+        <!-- ALL AVAILABLE FACILITIES (from DB) -->
+        <section>
+            <div class="section-title">All Available Facilities</div>
+            <div class="info-box">
+                <% if (facilities && facilities.length > 0) { %>
+                    <% facilities.forEach(f => { %>
+                        <div class="info-item">
+                            <strong><%= f.facility_name %>:</strong> <%= f.description %>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="info-item">
+                        No facilities found. Please check back again later.
+                    </div>
+                <% } %>
             </div>
-        <% }) %>
-    </div>
+        </section>
+
+        <!-- AVAILABLE FACILITIES CARDS -->
+        <section>
+            <div class="section-title">Available Facilities</div>
+
+            <div class="facility-grid">
+
+                <!-- Swimming Pool -->
+                <div class="facility-card">
+                    <img src="https://www.dmcihomes.com/uploads/news/las-pinas-condo-blends-comforts-of-urban-living-and-resort-style-relaxation-1643793808280.jpg"
+                         alt="Resort-style swimming pool">
+                    <div class="facility-body">
+                        <div class="facility-title">Resort-Style Swimming Pool</div>
+                        <p class="facility-desc">
+                            Take a relaxing dip or enjoy weekend swims with your family at our resort-inspired pool
+                            with kids section and deck chairs.
+                        </p>
+                        <button type="button" class="btn-primary">Book Appointment</button>
+                    </div>
+                </div>
+
+                <!-- Gym -->
+                <div class="facility-card">
+                    <img src="https://i.pinimg.com/originals/5d/c4/39/5dc4393ffe23fd5d36db122dcc2610de.jpg"
+                         alt="Fully equipped gym">
+                    <div class="facility-body">
+                        <div class="facility-title">Fully-Equipped Gym</div>
+                        <p class="facility-desc">
+                            Stay active with a modern fitness center featuring cardio and strength equipment,
+                            available daily for residents.
+                        </p>
+                        <button type="button" class="btn-primary">Book Appointment</button>
+                    </div>
+                </div>
+
+                <!-- Event Room -->
+                <div class="facility-card">
+                    <img src="https://th.bing.com/th/id/OIP.IzGnI7LYc2461F_zjP1xzgHaD8?w=264&h=180&c=7&r=0&o=7&dpr=1.5&pid=1.7&rm=3"
+                         alt="Event function room">
+                    <div class="facility-body">
+                        <div class="facility-title">Event Function Room</div>
+                        <p class="facility-desc">
+                            Host birthdays, meetings and community activities in a comfortable
+                            air-conditioned event room.
+                        </p>
+                        <button type="button" class="btn-primary">Book Appointment</button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
 
 </body>
 </html>
