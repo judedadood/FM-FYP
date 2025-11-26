@@ -175,6 +175,8 @@
             border-radius: 20px;
             cursor: pointer;
             font-size: 13px;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-primary:hover {
@@ -202,7 +204,8 @@
             <li><a href="/">Home</a></li>
             <li><a href="/announcements">Announcements</a></li>
             <li><a href="/facilities">Facilities</a></li>
-            <li><a href="/login">Login</a></li>
+            <li><a href="/maintenance-request">Maintenance Request</a></li> <!-- NEW -->
+            
         </ul>
     </nav>
 
@@ -254,7 +257,8 @@
                             Take a relaxing dip or enjoy weekend swims with your family at our resort-inspired pool
                             with kids section and deck chairs.
                         </p>
-                        <button type="button" class="btn-primary">Book Appointment</button>
+                        <!-- UPDATED: button → link to booking page -->
+                        <a href="/facilities/book/1" class="btn-primary">Book Appointment</a>
                     </div>
                 </div>
 
@@ -268,7 +272,8 @@
                             Stay active with a modern fitness center featuring cardio and strength equipment,
                             available daily for residents.
                         </p>
-                        <button type="button" class="btn-primary">Book Appointment</button>
+                        <!-- UPDATED -->
+                        <a href="/facilities/book/2" class="btn-primary">Book Appointment</a>
                     </div>
                 </div>
 
@@ -282,7 +287,8 @@
                             Host birthdays, meetings and community activities in a comfortable
                             air-conditioned event room.
                         </p>
-                        <button type="button" class="btn-primary">Book Appointment</button>
+                        <!-- UPDATED -->
+                        <a href="/facilities/book/3" class="btn-primary">Book Appointment</a>
                     </div>
                 </div>
 
