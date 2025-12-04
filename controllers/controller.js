@@ -2,21 +2,20 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db"); // database connection
+// const bcrypt = require("bcrypt"); // <-- enable when you switch to hashed passwords
 
 // ======================================================
-// AUTH MIDDLEWARE – CHECK LOGIN
+// AUTH MIDDLEWARE
 // ======================================================
 function requireLogin(req, res, next) {
-    if (!req.session || !req.session.userType) {
+    if (!req.session || !req.session.userId) {
         return res.redirect("/login"); // not logged in
     }
     next();
 }
 
-// ADMIN-ONLY MIDDLEWARE
 function requireAdmin(req, res, next) {
     if (!req.session || req.session.userType !== "admin") {
-        // not admin – send back to login (or you can send 403)
         return res.redirect("/login");
     }
     next();
@@ -50,7 +49,7 @@ router.get("/login", (req, res) => {
 });
 
 // ======================================================
-// LOGIN FORM SUBMIT (POST) – PREFIX LOGIC (R / A)
+// LOGIN FORM SUBMIT (POST) – USE users TABLE
 // ======================================================
 router.post("/login", (req, res) => {
     const { username, password } = req.body;
@@ -62,23 +61,61 @@ router.post("/login", (req, res) => {
         });
     }
 
-    const firstChar = username.charAt(0).toUpperCase(); // R or A
+    // Here we assume your login form uses "username" that matches users.name
+    const sql = "SELECT * FROM users WHERE name = ?";
 
-    if (firstChar === "R") {
-        // RESIDENT
-        req.session.userType = "resident";
-        return res.redirect("/resident");
-    }
+    db.query(sql, [username], async (err, results) => {
+        if (err) {
+            console.error("Login DB error:", err);
+            return res.render("login", {
+                title: "Login - Condo Management System",
+                error: "Server error. Please try again."
+            });
+        }
 
-    if (firstChar === "A") {
-        // ADMIN
-        req.session.userType = "admin";
-        return res.redirect("/admin");
-    }
+        if (results.length === 0) {
+            // No such user
+            return res.render("login", {
+                title: "Login - Condo Management System",
+                error: "Invalid username or password."
+            });
+        }
 
-    return res.render("login", {
-        title: "Login - Condo Management System",
-        error: "Invalid username format. Must start with R or A."
+        const user = results[0];
+
+        // FOR NOW (your DB stores plain "Password"):
+        const passwordsMatch = (password === user.password_hash);
+
+        // WHEN YOU SWITCH TO HASHED PASSWORDS, use this instead:
+        // const passwordsMatch = await bcrypt.compare(password, user.password_hash);
+
+        if (!passwordsMatch) {
+            return res.render("login", {
+                title: "Login - Condo Management System",
+                error: "Invalid username or password."
+            });
+        }
+
+        // SAVE SESSION
+        req.session.userId = user.user_id;
+        req.session.userName = user.name;
+        req.session.userType = user.role; // 'admin' or 'resident'
+
+        // REDIRECT BY ROLE
+        if (user.role === "admin") {
+            return res.redirect("/admin");
+        } else {
+            return res.redirect("/resident");
+        }
+    });
+});
+
+// ======================================================
+// LOGOUT
+// ======================================================
+router.get("/logout", (req, res) => {
+    req.session.destroy(() => {
+        res.redirect("/login");
     });
 });
 
@@ -86,18 +123,17 @@ router.post("/login", (req, res) => {
 // SIMPLE RESIDENT & ADMIN ROUTES (PROTECTED)
 // ======================================================
 router.get("/resident", requireLogin, (req, res) => {
-    // For now, residents land on Facilities
+    // Residents land on Facilities
     res.redirect("/facilities");
 });
 
-// Admin dashboard (now protected by requireAdmin)
 router.get("/admin", requireAdmin, (req, res) => {
     res.render("adminDashboard", {
-        title: "Admin Dashboard"
+        title: "Admin Dashboard",
+        userName: req.session.userName || "Admin"
     });
 });
 
-// Optional generic dashboard
 router.get("/dashboard", requireLogin, (req, res) => {
     res.send("You are logged in!");
 });
@@ -140,8 +176,6 @@ router.get("/facilities", requireLogin, (req, res) => {
 // ======================================================
 // FACILITY BOOKING (RESIDENT)
 // ======================================================
-
-// Show booking form (no DB query – map id -> name)
 router.get("/facilities/book/:facilityId", requireLogin, (req, res) => {
     const facilityId = parseInt(req.params.facilityId, 10);
 
@@ -163,7 +197,6 @@ router.get("/facilities/book/:facilityId", requireLogin, (req, res) => {
     });
 });
 
-// Handle booking submission
 router.post("/facilities/book", requireLogin, (req, res) => {
     const {
         facility_id,
@@ -203,70 +236,95 @@ router.post("/facilities/book", requireLogin, (req, res) => {
 // ======================================================
 // MAINTENANCE REQUEST (RESIDENT)
 // ======================================================
-
-// Show maintenance request form
 router.get("/maintenance-request", requireLogin, (req, res) => {
     res.render("maintenanceRequest", {
-        title: "Submit Maintenance Request"
+        title: "Submit Maintenance Request",
+        error: null
     });
 });
 
-// Handle maintenance request submission
 router.post("/maintenance-request", requireLogin, (req, res) => {
     const {
         resident_name,
-        unit_number,    // from form
+        unit_number,
         contact_number,
         facility_name,
         issue_type,
-        description     // textarea name="description"
+        description
     } = req.body;
 
-    // For now, force numeric unit for unit_id (FK is INT)
-    const unitId = parseInt(unit_number, 10);
-    if (Number.isNaN(unitId)) {
-        return res
-            .status(400)
-            .send("Unit Number must be a number, e.g. 101 (temporarily).");
+    // Validate required fields
+    if (!resident_name || !unit_number || !contact_number || !issue_type || !description) {
+        return res.status(400).render("maintenanceRequest", {
+            title: "Submit Maintenance Request",
+            error: "All required fields must be filled."
+        });
     }
 
-    const sql = `
-        INSERT INTO maintenance_requests
-          (unit_id, unit_label, requested_by, category, priority, status, description)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    `;
+    // 1) Look up unit_id from units using the unit number
+    const findUnitSql = "SELECT unit_id FROM units WHERE unit_no = ?";
 
-    db.query(
-        sql,
-        [
-            unitId,                                  // unit_id (INT)
-            unit_number,                             // unit_label (full text)
-            `${resident_name} (${contact_number})`,  // requested_by
-            issue_type || facility_name || "General",// category
-            "Normal",                                // priority
-            "Pending",                               // status
-            description                              // description
-        ],
-        (err) => {
-            if (err) {
-                console.error("Error saving maintenance request:", err);
-                return res
-                    .status(500)
-                    .send("Error saving request: " + (err.sqlMessage || err.message));
-            }
-
-            res.render("maintenanceSuccess", {
-                title: "Request Submitted"
+    db.query(findUnitSql, [unit_number], (err, rows) => {
+        if (err) {
+            console.error("Error looking up unit:", err);
+            return res.status(500).render("maintenanceRequest", {
+                title: "Submit Maintenance Request",
+                error: "Database error when checking unit number."
             });
         }
-    );
+
+        if (rows.length === 0) {
+            // No such unit in DB
+            return res.status(400).render("maintenanceRequest", {
+                title: "Submit Maintenance Request",
+                error: "Unit not found. Please enter a valid unit number."
+            });
+        }
+
+        const unitId = rows[0].unit_id;
+
+        const sql = `
+            INSERT INTO maintenance_requests
+              (unit_id, unit_label, requested_by, category, priority, status, description)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        db.query(
+            sql,
+            [
+                unitId,
+                unit_number,
+                `${resident_name} (${contact_number})`,
+                issue_type || facility_name || "General",
+                "Normal",
+                "Pending",
+                description
+            ],
+            (err2) => {
+                if (err2) {
+                    console.error("Database error on insert:", err2);
+                    return res.status(500).render("maintenanceRequest", {
+                        title: "Submit Maintenance Request",
+                        error: "Error: " + err2.message
+                    });
+                }
+
+                console.log("Request saved successfully");
+
+                return res.render("maintenanceSuccess", {
+                    title: "Request Submitted",
+                    resident_name,
+                    unit_number,
+                    issue_type: issue_type || facility_name || "General"
+                });
+            }
+        );
+    });
 });
 
 // ======================================================
 // ADMIN PAGES – BOOKINGS & MAINTENANCE OVERVIEW
 // ======================================================
-
-// Admin – view recent facility bookings
 router.get("/admin/bookings", requireAdmin, (req, res) => {
     const sql = `
         SELECT id, facility_name, resident_name, unit_number,
@@ -289,7 +347,6 @@ router.get("/admin/bookings", requireAdmin, (req, res) => {
     });
 });
 
-// Admin – view maintenance requests
 router.get("/admin/maintenance", requireAdmin, (req, res) => {
     const sql = `
         SELECT request_id, unit_id, unit_label, requested_by,
@@ -312,7 +369,6 @@ router.get("/admin/maintenance", requireAdmin, (req, res) => {
     });
 });
 
-// Admin – update status of a maintenance request
 router.post("/admin/maintenance/:id/status", requireAdmin, (req, res) => {
     const requestId = req.params.id;
     const { status } = req.body;  // Pending / In Progress / Completed
