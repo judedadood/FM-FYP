@@ -1,276 +1,380 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Announcements</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Announcements</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+  <style>
+    * { box-sizing: border-box; }
 
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background: #f4f4f4;
-            position: relative;
-        }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f4f4;
+      position: relative;
+    }
 
-        /* Background image */
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background: url("https://images.adsttc.com/media/images/5b67/0be1/f197/cc32/a300/002a/large_jpg/hanhai_qingyu_2.jpg?1533479842")
-                        center/cover no-repeat;
-            opacity: 0.25;
-            z-index: -1;
-        }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: url("https://images.adsttc.com/media/images/5b67/0be1/f197/cc32/a300/002a/large_jpg/hanhai_qingyu_2.jpg?1533479842")
+                  center/cover no-repeat;
+      opacity: 0.25;
+      z-index: -1;
+    }
 
-        nav {
-            background: #003366;
-            padding: 15px 25px;
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        nav .logo {
-            color: #fff;
-            font-size: 22px;
-            font-weight: bold;
-        }
-        nav ul {
-            display: flex;
-            gap: 20px;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        nav ul li a {
-            color: #fff;
-            text-decoration: none;
-        }
+    nav {
+      background: #003366;
+      padding: 15px 25px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    nav .logo { color: #fff; font-size: 22px; font-weight: bold; }
+    nav ul {
+      display: flex;
+      gap: 20px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    nav ul li a { color: #fff; text-decoration: none; }
 
-        .page-header {
-            background: linear-gradient(to right, rgba(0,51,102,0.95), rgba(0,51,102,0.85));
-            color: #fff;
-            padding: 25px 60px 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-        }
-        .page-header h1 {
-            margin: 0 0 8px;
-            font-size: 28px;
-        }
-        .page-header p {
-            margin: 0;
-            max-width: 720px;
-            font-size: 14px;
-            opacity: 0.9;
-        }
+    .page-header {
+      background: linear-gradient(to right, rgba(0,51,102,0.95), rgba(0,51,102,0.85));
+      color: #fff;
+      padding: 25px 60px 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+    .page-header h1 { margin: 0 0 8px; font-size: 28px; }
+    .page-header p {
+      margin: 0;
+      max-width: 720px;
+      font-size: 14px;
+      opacity: 0.9;
+    }
 
-        .outer-container {
-            padding: 25px 40px 40px;
-        }
+    .outer-container { padding: 25px 40px 40px; }
 
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255,255,255,0.96);
-            padding: 25px 25px 30px;
-            border-radius: 14px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.96);
+      padding: 25px 25px 30px;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
 
-        .announcement-card {
-            display: grid;
-            grid-template-columns: 220px 1fr;
-            gap: 22px;
-            padding: 20px;
-            border-radius: 12px;
-            background: #e7f0fb;
-            margin-top: 18px;
-            align-items: stretch;
-        }
+    .announcement-card {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 22px;
+      padding: 20px;
+      border-radius: 12px;
+      background: #e7f0fb;
+      margin-top: 18px;
+      align-items: stretch;
+    }
 
-        .announcement-image {
-            width: 100%;
-            height: 180px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.18);
-        }
-        .announcement-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
+    .announcement-image {
+      width: 100%;
+      height: 180px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+      background: #fff;
+    }
+    .announcement-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
 
-        .announcement-main {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      font-size: 11px;
+      border-radius: 20px;
+      color: #fff;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
 
-        .badge {
-            display: inline-block;
-            padding: 3px 9px;
-            font-size: 11px;
-            border-radius: 20px;
-            color: #fff;
-            font-weight: bold;
-            margin-bottom: 6px;
-        }
+    .title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
 
-        .title-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            gap: 10px;
-        }
+    .announcement-title {
+      font-size: 20px;
+      margin: 0;
+      color: #003366;
+    }
 
-        .announcement-title {
-            font-size: 20px;
-            margin: 0;
-            color: #003366;
-        }
+    .posted-date {
+      font-size: 12px;
+      color: #4a5d7a;
+    }
 
-        .posted-date {
-            font-size: 12px;
-            color: #4a5d7a;
-        }
+    .button-row { margin-top: 10px; }
 
-        .button-row {
-            margin-top: 10px;
-        }
+    .btn-details {
+      padding: 7px 16px;
+      border-radius: 20px;
+      border: none;
+      background: #003366;
+      color: #fff;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .btn-details:hover { background: #00509e; }
 
-        .btn-details {
-            padding: 7px 16px;
-            border-radius: 20px;
-            border: none;
-            background: #003366;
-            color: #fff;
-            font-size: 12px;
-            cursor: pointer;
-        }
-        .btn-details:hover {
-            background: #00509e;
-        }
+    .details-text {
+      display: none;
+      margin-top: 10px;
+      font-size: 13px;
+      color: #2f3d4f;
+      background: rgba(255,255,255,0.85);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .details-text.show { display: block; }
 
-        .details-text {
-            display: none;
-            margin-top: 10px;
-            font-size: 13px;
-            color: #2f3d4f;
-            background: rgba(255,255,255,0.85);
-            border-radius: 8px;
-            padding: 10px 12px;
-        }
+    /* ===== Events section styling ===== */
+    .section-divider {
+      margin: 35px 0 18px;
+      border: none;
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
 
-        .details-text.show {
-            display: block;
-        }
+    .events-title {
+      margin: 0 0 10px;
+      color: #003366;
+      font-size: 22px;
+      font-weight: 700;
+    }
 
-        @media (max-width: 800px) {
-            .announcement-card {
-                grid-template-columns: 1fr;
-            }
-            .announcement-image {
-                height: 200px;
-            }
-        }
-    </style>
+    .event-card {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 22px;
+      padding: 20px;
+      border-radius: 12px;
+      background: #eaf6ee;
+      margin-top: 18px;
+      align-items: stretch;
+    }
+
+    .event-image {
+      width: 100%;
+      height: 180px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.18);
+      background: #fff;
+    }
+
+    .event-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .event-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .event-name {
+      font-size: 20px;
+      margin: 0;
+      color: #003366;
+    }
+
+    .event-date {
+      font-size: 12px;
+      color: #4a5d7a;
+      white-space: nowrap;
+    }
+
+    .event-desc {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #2f3d4f;
+      background: rgba(255,255,255,0.85);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    @media (max-width: 800px) {
+      .announcement-card,
+      .event-card { grid-template-columns: 1fr; }
+      .announcement-image,
+      .event-image { height: 200px; }
+    }
+  </style>
 </head>
 
 <body>
 
 <nav>
-    <div class="logo">Condo Management System</div>
-    <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/announcements">Announcements</a></li>
-        <li><a href="/facilities">Facilities</a></li>
-        <li><a href="/maintenance-request">Maintenance Request</a></li>
-    </ul>
+  <div class="logo">Condo Management System</div>
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/announcements">Announcements</a></li>
+    <li><a href="/facilities">Facilities</a></li>
+    <li><a href="/maintenance-request">Maintenance Request</a></li>
+  </ul>
 </nav>
 
 <div class="page-header">
-    <h1>Announcements</h1>
-    <p>Stay updated with the latest notices for residents – from pool maintenance and fire drills to carpark upgrades and other important events.</p>
+  <h1>Announcements</h1>
+  <p>Stay updated with the latest notices for residents – from pool maintenance and fire drills to carpark upgrades and other important events.</p>
 </div>
 
 <div class="outer-container">
-    <div class="container">
-        <% announcements.forEach(a => { 
-            // choose badge + image + detail text based on title
-            let badgeText = "NOTICE";
-            let badgeColor = "#4c6fff";
-            let imageUrl = "https://via.placeholder.com/300x200?text=Announcement";
-            let detailText = "No additional details provided.";
+  <div class="container">
 
-            if (a.title === "Pool Maintenance") {
-                badgeText = "POOL";
-                badgeColor = "#00a2ff";
-                imageUrl = "https://www.dmcihomes.com/uploads/news/las-pinas-condo-blends-comforts-of-urban-living-and-resort-style-relaxation-1643793808280.jpg";
-                detailText = "Scheduled pool maintenance will take place on 19 Nov 2025 from 9:00am to 1:00pm. The pool will be temporarily closed during this period.";
-            } else if (a.title === "Fire Drill") {
-                badgeText = "FIRE DRILL";
-                badgeColor = "#ff4b4b";
-                imageUrl = "https://th.bing.com/th/id/OIP.z-cqT6_5yysJ7ADZBRSfWwHaHa?w=162&h=180&c=7&r=0&o=7&dpr=1.5&pid=1.7&rm=3";
-                detailText = "Fire drill is on 19 Nov 2025, 3:00pm–4:00pm. All residents, please come down to the main hall when you hear the alarm. Thank you for your cooperation.";
-            } else if (a.title === "Carpark Upgrade") {
-                badgeText = "CARPARK";
-                badgeColor = "#33b249";
-                imageUrl = "https://th.bing.com/th/id/OIP.SP-rKbNCLX8rUwbAw64_xgHaE7?w=249&h=180&c=7&r=0&o=7&dpr=1.5&pid=1.7&rm=3";
-                detailText = "Carpark upgrading works will run from 20 Nov 2025 to 30 Nov 2025, 10:00pm–6:00am daily. Some bays will be temporarily closed for resurfacing.";
-            }
-        %>
+    <!-- ===== Announcements ===== -->
+    <% if (announcements && announcements.length > 0) { %>
+      <% announcements.forEach(a => { 
+        let badgeText = "NOTICE";
+        let badgeColor = "#4c6fff";
+        let imageUrl = "https://via.placeholder.com/300x200?text=Announcement";
+        let detailText = "No additional details provided.";
 
-        <div class="announcement-card">
-            <div class="announcement-image">
-                <img src="<%= imageUrl %>" alt="<%= a.title %> image">
-            </div>
+        if (a.title === "Pool Maintenance") {
+          badgeText = "POOL";
+          badgeColor = "#00a2ff";
+          imageUrl = "https://www.dmcihomes.com/uploads/news/las-pinas-condo-blends-comforts-of-urban-living-and-resort-style-relaxation-1643793808280.jpg";
+          detailText = "Scheduled pool maintenance will take place on 19 Nov 2025 from 9:00am to 1:00pm. The pool will be temporarily closed during this period.";
+        } else if (a.title === "Fire Drill") {
+          badgeText = "FIRE DRILL";
+          badgeColor = "#ff4b4b";
+          imageUrl = "https://th.bing.com/th/id/OIP.z-cqT6_5yysJ7ADZBRSfWwHaHa?w=162&h=180&c=7&r=0&o=7&dpr=1.5&pid=1.7&rm=3";
+          detailText = "Fire drill is on 19 Nov 2025, 3:00pm–4:00pm. All residents, please come down to the main hall when you hear the alarm. Thank you for your cooperation.";
+        } else if (a.title === "Carpark Upgrade") {
+          badgeText = "CARPARK";
+          badgeColor = "#33b249";
+          imageUrl = "https://th.bing.com/th/id/OIP.SP-rKbNCLX8rUwbAw64_xgHaE7?w=249&h=180&c=7&r=0&o=7&dpr=1.5&pid=1.7&rm=3";
+          detailText = "Carpark upgrading works will run from 20 Nov 2025 to 30 Nov 2025, 10:00pm–6:00am daily. Some bays will be temporarily closed for resurfacing.";
+        }
+      %>
 
-            <div class="announcement-main">
-                <div>
-                    <span class="badge" style="background:<%= badgeColor %>;"><%= badgeText %></span>
-
-                    <div class="title-row">
-                        <h2 class="announcement-title"><%= a.title %></h2>
-                        <span class="posted-date">
-                            Posted on: <%= a.created_at.toLocaleDateString() %>
-                        </span>
-                    </div>
-
-                    <div class="button-row">
-                        <button class="btn-details toggle-details">Show Details</button>
-                    </div>
-
-                    <div class="details-text">
-                        <p><%= detailText %></p>
-                    </div>
-                </div>
-            </div>
+      <div class="announcement-card">
+        <div class="announcement-image">
+          <img
+            src="<%= imageUrl %>"
+            alt="<%= a.title %> image"
+            onerror="this.src='https://via.placeholder.com/300x200?text=Announcement';">
         </div>
 
-        <% }) %>
-    </div>
+        <div>
+          <span class="badge" style="background:<%= badgeColor %>;"><%= badgeText %></span>
+
+          <div class="title-row">
+            <h2 class="announcement-title"><%= a.title %></h2>
+            <span class="posted-date">
+              Posted on: <%= new Date(a.created_at).toLocaleDateString() %>
+            </span>
+          </div>
+
+          <div class="button-row">
+            <button class="btn-details toggle-details">Show Details</button>
+          </div>
+
+          <div class="details-text">
+            <p><%= detailText %></p>
+          </div>
+        </div>
+      </div>
+
+      <% }) %>
+    <% } else { %>
+      <p>No announcements yet.</p>
+    <% } %>
+
+    <!-- ===== Events section ===== -->
+    <hr class="section-divider">
+    <h2 class="events-title">Upcoming Events</h2>
+
+    <% if (events && events.length > 0) { %>
+      <% events.forEach(ev => { 
+        // Robust TIME formatter for mysql (string / Date / Buffer)
+        let timeStr = "";
+        if (ev.event_time) {
+          if (typeof ev.event_time === "string") {
+            // "19:00:00" -> "19:00"
+            timeStr = ev.event_time.slice(0, 5);
+          } else if (ev.event_time instanceof Date) {
+            const hh = String(ev.event_time.getHours()).padStart(2,'0');
+            const mm = String(ev.event_time.getMinutes()).padStart(2,'0');
+            timeStr = `${hh}:${mm}`;
+          } else if (Buffer.isBuffer(ev.event_time)) {
+            // Buffer -> try to parse as string
+            const s = ev.event_time.toString();
+            timeStr = s.slice(0, 5);
+          } else {
+            // fallback
+            timeStr = String(ev.event_time).slice(0, 5);
+          }
+        }
+
+        const dateStr = ev.event_date ? new Date(ev.event_date).toLocaleDateString() : "";
+        const img = (ev.image_url && ev.image_url.trim()) ? ev.image_url.trim() : "https://via.placeholder.com/300x200?text=Event";
+      %>
+
+        <div class="event-card">
+          <div class="event-image">
+            <img
+              src="<%= img %>"
+              alt="<%= ev.title %>"
+              onerror="this.src='https://via.placeholder.com/300x200?text=Event';">
+          </div>
+
+          <div>
+            <span class="badge" style="background:#33b249;">EVENT</span>
+
+            <div class="event-title-row">
+              <h2 class="event-name"><%= ev.title %></h2>
+              <span class="event-date">
+                Event: <%= dateStr %><% if (timeStr) { %> | <%= timeStr %><% } %>
+              </span>
+            </div>
+
+            <div class="event-desc">
+              <p style="margin:0;"><%= ev.description || "No description provided." %></p>
+            </div>
+          </div>
+        </div>
+
+      <% }) %>
+    <% } else { %>
+      <p style="color:#4a5d7a;">No upcoming events yet.</p>
+    <% } %>
+
+  </div>
 </div>
 
 <script>
-    // Toggle detail visibility and button text
-    document.querySelectorAll('.toggle-details').forEach(btn => {
-        btn.addEventListener('click', function () {
-            const card = this.closest('.announcement-card');
-            const details = card.querySelector('.details-text');
-
-            const isShown = details.classList.toggle('show');
-            this.textContent = isShown ? 'Hide Details' : 'Show Details';
-        });
+  document.querySelectorAll('.toggle-details').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const card = this.closest('.announcement-card');
+      const details = card.querySelector('.details-text');
+      const isShown = details.classList.toggle('show');
+      this.textContent = isShown ? 'Hide Details' : 'Show Details';
     });
+  });
 </script>
 
 </body>

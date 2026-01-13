@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= title %></title>
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <style>
+    nav {
+      background: #003366;
+      padding: 12px 25px;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    nav .logo { font-weight: bold; font-size: 20px; }
+    nav ul { list-style: none; display: flex; gap: 18px; margin:0; padding:0; }
+    nav a { color:#fff; text-decoration:none; font-size:14px; }
+    nav a:hover { text-decoration:underline; }
+    .thumb {
+      width: 90px;
+      height: 55px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: #f2f2f2;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+  </style>
+</head>
+<body class="bg-light">
+
+<nav>
+  <div class="logo">Condo Management System</div>
+  <ul>
+    <li><a href="/admin">Admin Dashboard</a></li>
+    <li><a href="/admin/bookings">Bookings</a></li>
+    <li><a href="/admin/maintenance">Maintenance</a></li>
+    <li><a href="/admin/events">Events</a></li>
+  </ul>
+</nav>
+
+<div class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="m-0">Manage Events</h2>
+    <a class="btn btn-success" href="/admin/events/new">+ Create Event</a>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th style="width:110px;">Image</th>
+              <th>Title</th>
+              <th style="width:160px;">Date</th>
+              <th style="width:120px;">Time</th>
+              <th style="width:160px;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (events && events.length > 0) { %>
+              <% events.forEach(ev => { 
+                // TIME display
+                let timeStr = "";
+                if (ev.event_time) {
+                  if (typeof ev.event_time === "string") timeStr = ev.event_time.slice(0,5);
+                  else timeStr = String(ev.event_time).slice(0,5);
+                }
+              %>
+                <tr>
+                  <td>
+                    <img class="thumb"
+                         src="<%= ev.image_url ? ev.image_url : 'https://via.placeholder.com/300x200?text=Event' %>"
+                         onerror="this.src='https://via.placeholder.com/300x200?text=Event';"
+                         alt="event image">
+                  </td>
+                  <td>
+                    <div class="fw-semibold"><%= ev.title %></div>
+                    <div class="text-muted small">
+                      <%= ev.description ? ev.description : "No description" %>
+                    </div>
+                  </td>
+                  <td><%= new Date(ev.event_date).toLocaleDateString() %></td>
+                  <td><%= timeStr %></td>
+                  <td>
+                    <a class="btn btn-sm btn-primary" href="/admin/events/<%= ev.event_id %>/edit">
+                      Edit
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="5" class="text-center p-4 text-muted">No events yet.</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-muted small mt-3">
+    These events will appear on the resident Announcements page under “Upcoming Events”.
+  </div>
+</div>
+
+</body>
+</html>

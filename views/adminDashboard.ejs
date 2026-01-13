@@ -29,36 +29,96 @@
     <li><a href="/admin">Admin Dashboard</a></li>
     <li><a href="/admin/bookings">Bookings</a></li>
     <li><a href="/admin/maintenance">Maintenance</a></li>
+    <li><a href="/admin/events">Events</a></li>
+    <li><a href="/admin/payments">Payments</a></li>
+    <li><a href="/admin/residents">Residents</a></li>
+    <li><a href="/logout">Logout</a></li>
   </ul>
 </nav>
 
 <div class="container my-5">
-  <h2 class="mb-4">Admin Dashboard</h2>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="m-0">Admin Dashboard</h2>
+    <div class="text-muted">Welcome, <%= userName || "Admin" %></div>
+  </div>
 
   <div class="row g-4">
+
+    <!-- Facility Bookings -->
     <div class="col-md-6">
-      <div class="card shadow-sm">
-        <div class="card-body">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
           <h4 class="card-title">Facility Bookings</h4>
           <p class="card-text">
             View recent facility bookings made by residents.
           </p>
-          <a href="/admin/bookings" class="btn btn-primary">View Bookings</a>
+          <div class="mt-auto">
+            <a href="/admin/bookings" class="btn btn-primary">View Bookings</a>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- Maintenance Requests -->
     <div class="col-md-6">
-      <div class="card shadow-sm">
-        <div class="card-body">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
           <h4 class="card-title">Maintenance Requests</h4>
           <p class="card-text">
             Review and update statuses of maintenance requests.
           </p>
-          <a href="/admin/maintenance" class="btn btn-primary">View Requests</a>
+          <div class="mt-auto">
+            <a href="/admin/maintenance" class="btn btn-primary">View Requests</a>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Events -->
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
+          <h4 class="card-title">Events</h4>
+          <p class="card-text">
+            Create and update upcoming events shown on the resident announcements page.
+          </p>
+          <div class="mt-auto">
+            <a href="/admin/events" class="btn btn-success">Manage Events</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payments -->
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
+          <h4 class="card-title">Payments</h4>
+          <p class="card-text">
+            Review condo fee and carpark fee payments submitted by residents, then approve or reject.
+          </p>
+          <div class="mt-auto">
+            <a href="/admin/payments" class="btn btn-dark">Manage Payments</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Residents -->
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column">
+          <h4 class="card-title">Residents</h4>
+          <p class="card-text">
+            Create and manage resident accounts stored in the database.
+          </p>
+          <div class="mt-auto">
+            <a href="/admin/residents" class="btn btn-secondary">Manage Residents</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= title %></title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <style>
+    nav { background:#003366; padding:12px 25px; color:#fff; display:flex; justify-content:space-between; align-items:center; }
+    nav .logo { font-weight:bold; font-size:20px; }
+    nav ul { list-style:none; display:flex; gap:18px; margin:0; padding:0; }
+    nav a { color:#fff; text-decoration:none; font-size:14px; }
+    nav a:hover { text-decoration:underline; }
+  </style>
+</head>
+<body class="bg-light">
+
+<nav>
+  <div class="logo">Condo Management System</div>
+  <ul>
+    <li><a href="/admin">Admin Dashboard</a></li>
+    <li><a href="/admin/residents">Residents</a></li>
+    <li><a href="/admin/payments">Payments</a></li>
+    <li><a href="/logout">Logout</a></li>
+  </ul>
+</nav>
+
+<div class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="m-0">Manage Residents</h2>
+    <a class="btn btn-success" href="/admin/residents/new">+ Add Resident</a>
+  </div>
+
+  <% if (error) { %>
+    <div class="alert alert-danger"><%= error %></div>
+  <% } %>
+
+  <div class="card shadow-sm">
+    <div class="card-body table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Resident ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Unit No</th>
+            <th>User ID</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!residents || residents.length === 0) { %>
+            <tr><td colspan="6" class="text-center text-muted py-4">No residents yet.</td></tr>
+          <% } %>
+
+          <% (residents || []).forEach(r => { %>
+            <tr>
+              <td><%= r.resident_id %></td>
+              <td><strong><%= r.name %></strong></td>
+              <td><%= r.email %></td>
+              <td><%= r.phone || "-" %></td>
+              <td><%= r.unit_numbers || "-" %></td>
+              <td><%= r.user_id %></td>
+              <td><%= r.created_at ? new Date(r.created_at).toLocaleString("en-SG") : "-" %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
