@@ -39,8 +39,7 @@
     <div class="alert alert-danger"><%= error %></div>
   <% } %>
 
-  <% 
-    // SAFETY DEFAULTS (prevents "mode is not defined" and undefined form fields)
+  <%
     const modeSafe = (typeof mode !== "undefined" && mode) ? mode : "create";
     const formSafe = (typeof form !== "undefined" && form) ? form : {};
   %>
@@ -67,27 +66,19 @@
         <div class="mb-3">
           <label class="form-label">Password</label>
           <input class="form-control" name="password" type="text" value="<%= formSafe.password || '' %>" required>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Unit Number (optional)</label>
-          <input class="form-control" name="unit_no" placeholder="e.g. 101" value="<%= formSafe.unit_no || '' %>">
-          <div class="form-text">Unit must already exist in the system.</div>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Unit Role</label>
-          <select class="form-control" name="unit_role">
-            <option value="owner" <%= (formSafe.unit_role || 'owner') === 'owner' ? 'selected' : '' %>>Owner</option>
-            <option value="tenant" <%= (formSafe.unit_role || 'owner') === 'tenant' ? 'selected' : '' %>>Tenant</option>
-          </select>
-          <div class="form-text">Choose how this resident is linked to the unit.</div>
+          <div class="form-text">This is the initial login password. It will be stored as a hash.</div>
         </div>
       <% } %>
 
       <div class="mb-3">
-        <label class="form-label">Phone (optional)</label>
-        <input class="form-control" name="phone" value="<%= formSafe.phone || '' %>">
+        <label class="form-label">Unit Number</label>
+        <input class="form-control" name="unit_number" placeholder="e.g. 101"
+               value="<%= formSafe.unit_number || '' %>" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Phone</label>
+        <input class="form-control" name="phone" value="<%= formSafe.phone || '' %>" required>
       </div>
 
       <% if (modeSafe === 'edit') { %>

@@ -54,6 +54,13 @@
         <div class="col-md-8">
             <h2 class="mb-4">Book <%= facility.name %></h2>
 
+            <% if (error) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <%= error %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+
             <form action="/facilities/book" method="POST" class="card p-4 shadow-sm">
 
                 <!-- IMPORTANT: submit facility_id only -->
@@ -72,7 +79,8 @@
 
                 <div class="mb-3">
                     <label class="form-label">Unit Number</label>
-                    <input type="number" name="unit_number" class="form-control" placeholder="101" required>
+                    <input type="text" class="form-control" value="<%= unitNo || 'N/A' %>" disabled readonly>
+                    <div class="form-text">Your unit number (auto-filled from system)</div>
                 </div>
 
                 <div class="mb-3">

@@ -190,6 +190,7 @@ router.get("/facilities", requireLogin, (req, res) => {
 router.get("/facilities/book/:facilityId", requireLogin, (req, res) => {
   const facilityId = parseInt(req.params.facilityId, 10);
   const selectedDate = req.query.date || new Date().toISOString().slice(0, 10);
+  const userId = req.session.userId;
 
   const facilitySql = `
     SELECT facility_id, name, description, capacity
@@ -198,29 +199,97 @@ router.get("/facilities/book/:facilityId", requireLogin, (req, res) => {
   `;
 
   db.query(facilitySql, [facilityId], (err, facilities) => {
-    if (err) return res.status(500).send("Database error");
-    if (facilities.length === 0) return res.status(404).send("Facility not found");
+    if (err) {
+      console.error("Facility lookup error:", err);
+      return res.status(500).render("bookFacility", {
+        title: "Book Facility",
+        facility: null,
+        selectedDate,
+        bookedMap: {},
+        unitNo: null,
+        error: "Database error fetching facility",
+      });
+    }
+    if (facilities.length === 0) {
+      return res.status(404).render("bookFacility", {
+        title: "Book Facility",
+        facility: null,
+        selectedDate,
+        bookedMap: {},
+        unitNo: null,
+        error: "Facility not found",
+      });
+    }
 
     const facility = facilities[0];
 
-    const countSql = `
-      SELECT time_slot, COUNT(*) AS booked_count
-      FROM FacilityBookings
-      WHERE facility_id = ? AND booking_date = ?
-      GROUP BY time_slot
+    // Fetch resident's unit number
+    const unitSql = `
+      SELECT u.unit_no
+      FROM residents r
+      JOIN units u ON (u.owner_resident_id = r.resident_id OR u.tenant_resident_id = r.resident_id)
+      WHERE r.user_id = ?
+      LIMIT 1
     `;
 
-    db.query(countSql, [facilityId, selectedDate], (err2, rows) => {
-      if (err2) return res.status(500).send("Database error");
+    db.query(unitSql, [userId], (err2, unitRows) => {
+      if (err2) {
+        console.error("Unit lookup error:", err2);
+        return res.status(500).render("bookFacility", {
+          title: "Book Facility",
+          facility,
+          selectedDate,
+          bookedMap: {},
+          unitNo: null,
+          error: "Database error fetching your unit",
+        });
+      }
 
-      const bookedMap = {};
-      rows.forEach((r) => (bookedMap[r.time_slot] = r.booked_count));
+      if (unitRows.length === 0) {
+        console.warn("No unit found for userId:", userId);
+        return res.status(400).render("bookFacility", {
+          title: "Book Facility",
+          facility,
+          selectedDate,
+          bookedMap: {},
+          unitNo: null,
+          error: "No unit assigned to your account. Please contact admin.",
+        });
+      }
 
-      res.render("bookFacility", {
-        title: "Book Facility",
-        facility,
-        selectedDate,
-        bookedMap,
+      const unitNo = unitRows[0].unit_no;
+
+      const countSql = `
+        SELECT time_slot, COUNT(*) AS booked_count
+        FROM FacilityBookings
+        WHERE facility_id = ? AND booking_date = ?
+        GROUP BY time_slot
+      `;
+
+      db.query(countSql, [facilityId, selectedDate], (err3, rows) => {
+        if (err3) {
+          console.error("Booked count lookup error:", err3);
+          return res.status(500).render("bookFacility", {
+            title: "Book Facility",
+            facility,
+            selectedDate,
+            bookedMap: {},
+            unitNo,
+            error: "Database error fetching availability",
+          });
+        }
+
+        const bookedMap = {};
+        rows.forEach((r) => (bookedMap[r.time_slot] = r.booked_count));
+
+        res.render("bookFacility", {
+          title: "Book Facility",
+          facility,
+          selectedDate,
+          bookedMap,
+          unitNo,
+          error: null,
+        });
       });
     });
   });
@@ -232,41 +301,58 @@ router.get("/facilities/book/:facilityId", requireLogin, (req, res) => {
 // ======================================================
 router.post("/facilities/book", requireLogin, (req, res) => {
   const facilityId = parseInt(req.body.facility_id, 10);
-  const { resident_name, unit_number, contact_number, booking_date, time_slot } = req.body;
+  const { resident_name, contact_number, booking_date, time_slot } = req.body;
+  const userId = req.session.userId;
 
-  const capSql = `SELECT name, capacity FROM Facilities WHERE facility_id = ?`;
-  db.query(capSql, [facilityId], (err, frows) => {
-    if (err) return res.status(500).send(err.message);
-    if (frows.length === 0) return res.status(400).send("Invalid facility");
+  // Fetch resident's actual unit number from DB (ignore any client input)
+  const unitSql = `
+    SELECT u.unit_no
+    FROM residents r
+    JOIN units u ON (u.owner_resident_id = r.resident_id OR u.tenant_resident_id = r.resident_id)
+    WHERE r.user_id = ?
+    LIMIT 1
+  `;
 
-    const facility_name = frows[0].name;
-    const capacity = frows[0].capacity;
+  db.query(unitSql, [userId], (err, unitRows) => {
+    if (err) return res.status(500).send("Database error: " + err.message);
+    if (unitRows.length === 0) return res.status(400).send("Unit not found for this resident");
 
-    const countSql = `
-      SELECT COUNT(*) AS booked
-      FROM FacilityBookings
-      WHERE facility_id = ? AND booking_date = ? AND time_slot = ?
-    `;
-    db.query(countSql, [facilityId, booking_date, time_slot], (err2, crows) => {
+    const unit_number = unitRows[0].unit_no;
+
+    const capSql = `SELECT name, capacity FROM Facilities WHERE facility_id = ?`;
+    db.query(capSql, [facilityId], (err2, frows) => {
       if (err2) return res.status(500).send(err2.message);
+      if (frows.length === 0) return res.status(400).send("Invalid facility");
 
-      if (crows[0].booked >= capacity) {
-        return res.status(400).send("This time slot is FULL. Please choose another.");
-      }
+      const facility_name = frows[0].name;
+      const capacity = frows[0].capacity;
 
-      const insertSql = `
-        INSERT INTO FacilityBookings
-        (facility_id, resident_name, unit_number, contact_number, booking_date, time_slot)
-        VALUES (?, ?, ?, ?, ?, ?)
+      const countSql = `
+        SELECT COUNT(*) AS booked
+        FROM FacilityBookings
+        WHERE facility_id = ? AND booking_date = ? AND time_slot = ?
       `;
-      db.query(insertSql, [facilityId, resident_name, unit_number, contact_number, booking_date, time_slot], (err3) => {
+      db.query(countSql, [facilityId, booking_date, time_slot], (err3, crows) => {
         if (err3) return res.status(500).send(err3.message);
 
-        res.render("bookingSuccess", {
-          title: "Booking Confirmed",
-          facility_name,
-          booking_date,
-          time_slot,
+        if (crows[0].booked >= capacity) {
+          return res.status(400).send("This time slot is FULL. Please choose another.");
+        }
+
+        const insertSql = `
+          INSERT INTO FacilityBookings
+          (facility_id, resident_name, unit_number, contact_number, booking_date, time_slot)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `;
+        db.query(insertSql, [facilityId, resident_name, unit_number, contact_number, booking_date, time_slot], (err4) => {
+          if (err4) return res.status(500).send(err4.message);
+
+          res.render("bookingSuccess", {
+            title: "Booking Confirmed",
+            facility_name,
+            booking_date,
+            time_slot,
+          });
         });
       });
     });
@@ -277,41 +363,78 @@ router.post("/facilities/book", requireLogin, (req, res) => {
 // MAINTENANCE REQUEST (RESIDENT)
 // ======================================================
 router.get("/maintenance-request", requireLogin, (req, res) => {
-  res.render("maintenanceRequest", {
-    title: "Submit Maintenance Request",
-    error: null,
+  const userId = req.session.userId;
+
+  // Fetch resident's unit number
+  const unitSql = `
+    SELECT u.unit_no
+    FROM residents r
+    JOIN units u ON (u.owner_resident_id = r.resident_id OR u.tenant_resident_id = r.resident_id)
+    WHERE r.user_id = ?
+    LIMIT 1
+  `;
+
+  db.query(unitSql, [userId], (err, unitRows) => {
+    if (err) {
+      console.error("Unit lookup error:", err);
+      return res.render("maintenanceRequest", {
+        title: "Submit Maintenance Request",
+        error: "Database error fetching your unit",
+        unitNo: null,
+      });
+    }
+
+    const unitNo = unitRows.length > 0 ? unitRows[0].unit_no : null;
+
+    res.render("maintenanceRequest", {
+      title: "Submit Maintenance Request",
+      error: null,
+      unitNo,
+    });
   });
 });
 
 router.post("/maintenance-request", requireLogin, (req, res) => {
-  const { resident_name, unit_number, contact_number, facility_name, issue_type, description } = req.body;
+  const { resident_name, contact_number, facility_name, issue_type, description } = req.body;
+  const userId = req.session.userId;
 
-  if (!resident_name || !unit_number || !contact_number || !issue_type || !description) {
+  if (!resident_name || !contact_number || !issue_type || !description) {
     return res.status(400).render("maintenanceRequest", {
       title: "Submit Maintenance Request",
       error: "All required fields must be filled.",
+      unitNo: null,
     });
   }
 
-  const findUnitSql = "SELECT unit_id FROM units WHERE unit_no = ?";
+  // Fetch resident's actual unit number from DB (ignore any client input)
+  const unitSql = `
+    SELECT u.unit_no, u.unit_id
+    FROM residents r
+    JOIN units u ON (u.owner_resident_id = r.resident_id OR u.tenant_resident_id = r.resident_id)
+    WHERE r.user_id = ?
+    LIMIT 1
+  `;
 
-  db.query(findUnitSql, [unit_number], (err, rows) => {
+  db.query(unitSql, [userId], (err, unitRows) => {
     if (err) {
       console.error("Error looking up unit:", err);
       return res.status(500).render("maintenanceRequest", {
         title: "Submit Maintenance Request",
         error: "Database error when checking unit number.",
+        unitNo: null,
       });
     }
 
-    if (rows.length === 0) {
+    if (unitRows.length === 0) {
       return res.status(400).render("maintenanceRequest", {
         title: "Submit Maintenance Request",
-        error: "Unit not found. Please enter a valid unit number.",
+        error: "No unit assigned to your account. Please contact admin.",
+        unitNo: null,
       });
     }
 
-    const unitId = rows[0].unit_id;
+    const unitId = unitRows[0].unit_id;
+    const unit_number = unitRows[0].unit_no;
 
     const sql = `
       INSERT INTO maintenance_requests
@@ -328,6 +451,7 @@ router.post("/maintenance-request", requireLogin, (req, res) => {
           return res.status(500).render("maintenanceRequest", {
             title: "Submit Maintenance Request",
             error: "Error: " + err2.message,
+            unitNo: unit_number,
           });
         }
 
@@ -778,18 +902,16 @@ router.get("/admin/residents", requireAdmin, (req, res) => {
   const sql = `
     SELECT
       r.resident_id,
-      u.user_id,
+      r.user_id,
       u.name,
       u.email,
-      u.created_at,
       r.phone,
-      GROUP_CONCAT(DISTINCT un.unit_no ORDER BY un.unit_no SEPARATOR ', ') AS unit_numbers
+      u.created_at,
+      GROUP_CONCAT(DISTINCT un.unit_no ORDER BY un.unit_no SEPARATOR ', ') AS units
     FROM residents r
     JOIN users u ON u.user_id = r.user_id
-    LEFT JOIN units un
-      ON un.owner_resident_id = r.resident_id
-      OR un.tenant_resident_id = r.resident_id
-    GROUP BY r.resident_id, u.user_id, u.name, u.email, u.created_at, r.phone
+    LEFT JOIN units un ON (un.owner_resident_id = r.resident_id OR un.tenant_resident_id = r.resident_id)
+    GROUP BY r.resident_id
     ORDER BY r.resident_id DESC
   `;
 
@@ -942,4 +1064,94 @@ router.get("/admin/residents/:id", requireAdmin, (req, res) => {
     res.json(rows[0]);
   });
 });
+
+// EDIT resident form
+router.get("/admin/residents/:id/edit", requireAdmin, (req, res) => {
+  const residentId = parseInt(req.params.id, 10);
+  if (Number.isNaN(residentId)) return res.status(400).send("Invalid resident id");
+
+  const sql = `
+    SELECT
+      r.resident_id,
+      r.phone,
+      u.user_id,
+      u.name,
+      u.email
+    FROM residents r
+    JOIN users u ON u.user_id = r.user_id
+    WHERE r.resident_id = ?
+    LIMIT 1
+  `;
+
+  db.query(sql, [residentId], (err, rows) => {
+    if (err) {
+      console.error("Resident lookup error:", err);
+      return res.status(500).send("Database error");
+    }
+    if (rows.length === 0) return res.status(404).send("Resident not found");
+
+    const resident = rows[0];
+    res.render("adminResidentForm", {
+      title: "Edit Resident",
+      mode: "edit",
+      form: {
+        resident_id: resident.resident_id,
+        name: resident.name,
+        email: resident.email,
+        password: "",
+        phone: resident.phone || "",
+        unit_no: "",
+      },
+      error: null,
+      userName: req.session.userName || "Admin",
+    });
+  });
+});
+
+// UPDATE resident
+router.post("/admin/residents/:id/edit", requireAdmin, (req, res) => {
+  const residentId = parseInt(req.params.id, 10);
+  const { name, email, phone } = req.body;
+
+  if (!name || !email) {
+    return res.render("adminResidentForm", {
+      title: "Edit Resident",
+      mode: "edit",
+      form: { resident_id: residentId, name, email, phone, password: "", unit_no: "" },
+      error: "Name and Email are required.",
+      userName: req.session.userName || "Admin",
+    });
+  }
+
+  const userUpdateSql = `UPDATE users SET name = ?, email = ? WHERE user_id = (SELECT user_id FROM residents WHERE resident_id = ?)`;
+  db.query(userUpdateSql, [name, email, residentId], (err) => {
+    if (err) {
+      console.error("Update user error:", err);
+      return res.render("adminResidentForm", {
+        title: "Edit Resident",
+        mode: "edit",
+        form: { resident_id: residentId, name, email, phone, password: "", unit_no: "" },
+        error: "Database error: " + err.message,
+        userName: req.session.userName || "Admin",
+      });
+    }
+
+    const residentUpdateSql = `UPDATE residents SET phone = ? WHERE resident_id = ?`;
+    db.query(residentUpdateSql, [phone || null, residentId], (err2) => {
+      if (err2) {
+        console.error("Update resident error:", err2);
+        return res.render("adminResidentForm", {
+          title: "Edit Resident",
+          mode: "edit",
+          form: { resident_id: residentId, name, email, phone, password: "", unit_no: "" },
+          error: "Database error: " + err2.message,
+          userName: req.session.userName || "Admin",
+        });
+      }
+
+      res.redirect("/admin/residents");
+    });
+  });
+});
+
 module.exports = router;
